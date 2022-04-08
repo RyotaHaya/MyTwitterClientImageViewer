@@ -1,0 +1,54 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tweepy = "*"
+fastapi = "==0.70.0"
+uvicorn = "==0.15.0"
+python-dotenv = "*"
+snscrape = "*"
+opencv-python = "*"
+numpy = "*"
+pandas = "*"
+jwt = "==1.3.1"
+passlib = {extras = ["bcrypt"], version = "*"}
+anyio = "==3.3.2"
+bcrypt = "==3.2.0"
+cffi = "==1.14.6"
+click = "==8.0.1"
+gunicorn = "==20.1.0"
+h11 = "==0.12.0"
+idna = "==3.2"
+pycparser = "==2.20"
+pydantic = "==1.8.2"
+pyjwt = "==2.3.0"
+python-multipart = "==0.0.5"
+six = "==1.16.0"
+sniffio = "==1.2.0"
+starlette = "==0.16.0"
+typing-extensions = "==3.10.0.2"
+python-jose = {extras = ["cryptography"], version = "*"}
+firebase-admin = "*"
+google-api-python-client = "*"
+pymysql = "*"
+sqlalchemy = "==1.4.29"
+cryptography = "*"
+cryptocode = "*"
+isort = "*"
+gcloud = "*"
+
+[dev-packages]
+mypy = "*"
+flake8 = "*"
+yapf = "*"
+
+[requires]
+python_version = "3.9"
+
+[scripts]
+dev="uvicorn --host=0.0.0.0 --port=5043 --debug --log-level=debug main:app --reload"
+prod="uvicorn --host=0.0.0.0 --port=5043 main:app --reload"
+format = "yapf -r -i ."
+lint   = "flake8 --show-source ."

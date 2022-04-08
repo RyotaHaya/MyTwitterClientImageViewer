@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+    app:
+        image: pictcafe_app:latest
+        build:
+            context: .
+            dockerfile: "./client/Docker/Dockerfile"
+        volumes:
+            - ./client/:/app
+        ports:
+            - 3000:3000
+        command: yarn dev
+        environment:
+            API_URL: "http://api:5043"
+
+    api:
+        image: twitter-fast-api:latest
+        build:
+            context: .
+            dockerfile: "./server/Docker/Dockerfile"
+        ports:
+            - 5043:5043
+        volumes:
+            - ./server/:/app
+        environment:
+            TZ: "Asia/Tokyo"
+        command: bash -c "pipenv run dev"
