@@ -6,7 +6,7 @@ export default {
     baseURL: process.env.BASE_URL || 'http://locahost:3000',
     axios: {
       baseURL: 'http://localhost:5043',
-      browserBaseURL: process.env.API_URL || 'http://localhost:5043',
+      browserBaseURL: process.env.API_URL || 'http://localhost:3000',
       proxy: true,
       // axios request時にhostに自動付与する
       prefix: '/api',
@@ -52,8 +52,8 @@ export default {
     { src: '~/plugins/firebase/firebase.auth', mode: 'client' },
     { src: '~/plugins/vuex/cookie-storage', mode: 'client' },
     // nsfw plugins
-
     { src: '~/plugins/infiniteloading', ssr: false },
+    // IruCache https://qiita.com/k_0214/items/4ee8c8dfd9bd3d8f64f4
   ],
 
   server: {
@@ -62,6 +62,7 @@ export default {
 
   router: {
     middleware: 'authenticated',
+    routes: [],
   },
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -79,11 +80,20 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    // シンプルな使い方
+    [
+      '@nuxtjs/component-cache',
+      {
+        max: 10000,
+        maxAge: 1000 * 60 * 60,
+      },
+    ],
     '~/modules/example',
-    '~/modules/nsfw',
+    //'~/modules/nsfw',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/dotenv',
     '@nuxtjs/axios',
+
     //'@nuxtjs/pwa',
     // [
     //   '@nuxtjs/firebase',
@@ -110,6 +120,7 @@ export default {
     //   },
     // ],
   ],
+  watch: ['~/modules/*'],
 
   pwa: {
     //meta: false,
@@ -150,6 +161,7 @@ export default {
      */
     transpile: [/typed-vuex/],
     extend(config, ctx) {},
+    analyze: true,
   },
 
   // publicRuntimeConfigでbrowserBaseURLを設定しているため設定不要
@@ -161,5 +173,5 @@ export default {
     credentials: true,
   },
 
-  // proxy: { '/api/': { target: 'http://localhost:5043' } },
+  proxy: { '/api/': { target: 'http://localhost:5043' } },
 }

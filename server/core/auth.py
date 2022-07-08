@@ -1,9 +1,6 @@
 """firebase認証
     CookieによるFirebaseの認証関連処理を実行する
 
-Todo:
-    特になし
-
 """
 
 import datetime

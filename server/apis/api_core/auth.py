@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import os
-import sys
-
-sys.path.append(os.pardir)
 from routes.model import AuthParam
 from util import encryption
 

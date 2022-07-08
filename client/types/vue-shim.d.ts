@@ -3,7 +3,7 @@
 //https://github.com/vuejs/vetur/issues/1817#issuecomment-614789578
 
 // 公式サイトの記述
-declare module '*.vue' {
-  import Vue from 'vue'
-  export default Vue
-}
+// declare module '*.vue' {
+//   import Vue from 'vue'
+//   export default Vue
+// }

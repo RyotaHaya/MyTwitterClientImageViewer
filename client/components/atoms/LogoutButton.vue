@@ -1,9 +1,5 @@
 <template>
-  <v-btn
-    class="color-twitter text-capitalize mb-3"
-    max-width="300"
-    @click="twitterLogout"
-  >
+  <v-btn class="color-twitter text-capitalize mb-3" @click="twitterLogout">
     <v-icon left class="color-twitter__icon" size="22"> mdi-twitter </v-icon>
     ログアウト
   </v-btn>

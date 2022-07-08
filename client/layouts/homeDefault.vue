@@ -8,7 +8,7 @@
     </v-navigation-drawer>
     -->
 
-    <v-app-bar color="teal accent-4" dense dark elevate-on-scroll>
+    <v-app-bar color="primary" dense dark elevate-on-scroll>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
       <div class="ml-5"><AtomsAvatar /></div>
       <v-spacer></v-spacer>
@@ -41,7 +41,8 @@
     </v-footer>
   </v-app>
 </template>
-
+<style></style>
+>
 <script>
 import { AuthorizationStore } from '~/store'
 export default {

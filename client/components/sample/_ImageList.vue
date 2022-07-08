@@ -86,8 +86,7 @@
           spinner="spiral"
           @infinite="infiniteHandler(dispListId)"
         >
-          <div slot="no-results" />
-          ddd
+          <span slot="no-results">検索結果はありません</span>
         </infinite-loading>
       </div>
     </keep-alive>
@@ -110,7 +109,6 @@
   </div>
 </template>
 <script>
-import * as nsfwjs from 'nsfwjs'
 import { AuthorizationStore, TwitterStore } from '~/store'
 
 export default {

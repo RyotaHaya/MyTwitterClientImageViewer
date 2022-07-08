@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import os
-import sys
 from typing import Optional
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
@@ -10,12 +8,9 @@ from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
 from apis.api_core.auth import api_core_auth
 from apis.api_twitter.twitter_dao import TwiterDAO
 from core.auth import (create_session_cookie, get_current_user, set_session_cookie)
+from util import encryption, timer
 
 from .model import SessionParam
-
-sys.path.append(os.pardir)
-
-from util import encryption
 
 router = APIRouter()
 
@@ -34,9 +29,13 @@ async def session_login(session_param: SessionParam, response: Response) -> dict
 
     """
     
+    # 有効期限
     expires_in = datetime.timedelta(days = 14)
     session_cookie = create_session_cookie(session_param.firebase_id_token, expires_in)
+    
+    # トークンを登録
     encryption.create_auth_token_str(session_param.token, session_param.secret)
+    
     set_session_cookie(response, "session", session_cookie, expires_in)
     set_session_cookie(response, "tw_auth_token", session_param.token, expires_in)
     
@@ -50,9 +49,6 @@ async def view_firebaselogin(
 ) -> dict[str, object]:
     """FireBaseログイン
         FireBaseのログイン状態を確認する
-    Args:
-        session_param:
-        response:
     Returns:
         dict: result
 
@@ -145,7 +141,11 @@ async def view_timeline_list(id: Optional[str] = "",
     }
     
     try:
+        s = timer.timer_start()
         api = TwiterDAO(auth, tw_auth_token)
+        end = timer.timer_end(s)
+        
+        print("db_access_elapsed_time:{0}".format(end) + "[sec]")
         return api.get_list_timeline(q)
     
     except Exception as e:
@@ -154,15 +154,12 @@ async def view_timeline_list(id: Optional[str] = "",
 
 @router.get("/api/twitter/lists", tags = ["api_twitter"])
 async def view_user_list(user_name: Optional[str] = "", auth: Depends = Depends(get_current_user), tw_auth_token: Optional[str] = Cookie(None)) -> dict[str, object]:
-    """Twitterリスト取得
-        ユーザのリストを取得する
-    Args:
+    """
+    Get User timelineList information:
 
-    Returns:
-        dict: result
-
-    Raises:
-
+    - **user_name**: user displayname
+    \f
+    :param item: User input.
     """
     
     q = {"user_name": user_name}

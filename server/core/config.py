@@ -1,3 +1,8 @@
+"""設定ファイル読込み
+* .envファイルから設定ファイルから読み込みする。
+
+"""
+
 import os
 
 from dotenv import load_dotenv

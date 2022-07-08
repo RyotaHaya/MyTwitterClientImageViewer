@@ -7,19 +7,19 @@
             <v-container fluid>
               <v-row dense>
                 <v-col
-                  v-for="tweet in tweets"
+                  v-for="tweet in dipsTweets"
                   :key="tweet.id"
                   cols="6"
-                  xs="12"
-                  sm="4"
-                  md="3"
+                  xs="6"
+                  sm="6"
+                  md="4"
                   lg="3"
-                  xl="2"
+                  xl="3"
                 >
-                  <!-- メディア表示 -->
                   <AtomsImageCard
                     v-bind:tweet="tweet"
                     v-bind:parentListId="dispListId"
+                    v-bind:classifyModel="classifyModel"
                   />
                 </v-col>
               </v-row>
@@ -31,7 +31,8 @@
             spinner="spiral"
             @infinite="infiniteHandler(dispListId)"
           >
-            <span slot="no-more">これ以上読み込みできません。</span>
+            <span slot="no-more"></span>
+            <span slot="no-results">これ以上読み込みできません。</span>
           </infinite-loading>
         </div>
       </div>
@@ -56,22 +57,40 @@
   </v-card>
 </template>
 <script>
-import { TwitterStore } from '~/store'
+import { TwitterStore, DispSettingsStore } from '~/store'
 import ImageCard from '../atoms/ImageCard.vue'
+import * as nsfwjs from 'nsfwjs'
+
 export default {
   data() {
     return {
       getCnt: 30,
       tweets: [],
+      drawingTweets: [],
+      nsfwTweets: [],
+      classifyImageDone: [],
       filter: '',
       scrollY: 0,
+      processing: false,
+      show: true,
+      mounted: false,
     }
   },
   props: {
     dispListId: {
       type: String,
-      default: 'ddd',
+      default: '',
       required: false,
+    },
+    classifyModel: {
+      type: Object,
+      default: null,
+      required: false,
+    },
+    dispContent: {
+      type: String,
+      default: '0',
+      required: true,
     },
   },
   components: {
@@ -79,121 +98,128 @@ export default {
     ImageCard,
   },
 
+  computed: {
+    dipsTweets: function () {
+      const a = this.drawingTweets
+      const content = this.dispContent
+      return this.tweets.filter(function (tweet) {
+        if (content == 1) {
+          return a.includes(tweet.id)
+        } else if (content == 2) {
+          return !a.includes(tweet.id)
+        } else {
+          return tweet
+        }
+      })
+    },
+  },
   methods: {
     // スクロール時の動作
-    infiniteHandler(listid) {
-      this.$refs.infiniteLoading.stateChanger.complete()
-      //this.$refs.infiniteLoading.stateChanger.loaded()
-      if (this.tweets.length < 50) {
-        // const fetchOldTweet = this.tweets[this.tweets.length - 1]
-        // this.$refs.infiniteLoading.stateChanger.loaded()
-        // TwitterStore.fetchListTweets({
-        //   id: this.dispListId,
-        //   sinceTweetID: fetchOldTweet.id,
-        // }).then((data) => {
-        //   data.forEach((tweets) => {
-        //     this.tweets.push(tweets)
-        //   })
-        // })
-        //this.$refs.infiniteLoading.stateChanger.loaded()
-      } else {
-        //this.$refs.infiniteLoading.stateChanger.complete()
-      }
+    infiniteHandler(dispListId) {
+      this.processing = true
+      const fetchOldTweet = this.tweets[this.tweets.length - 1]
 
-      // fetchTweets.forEach((tweets) => {
-      //   this.tweets.push(tweets)
-      // })
+      const reqSinceTweetID = fetchOldTweet.retweetId
+        ? fetchOldTweet.retweetId
+        : fetchOldTweet.id
 
-      //this.$refs.infiniteLoading.stateChanger.complete()
+      TwitterStore.fetchListTweets({
+        id: dispListId,
+        sinceTweetID: reqSinceTweetID,
+      }).then((data) => {
+        data.forEach((tweet) => {
+          if (fetchOldTweet.id !== tweet.id) {
+            this.tweets.push(tweet)
+          }
+        })
 
-      // maxId指定して取得
-      // } else {
-      //   this.$refs.infiniteLoading.stateChanger.complete()
-      // }
+        if (data.length == 1) {
+          //alert('これ以上取得できません')
+          this.show = false
+          this.$refs.infiniteLoading.stateChanger.complete()
+        } else {
+          this.$refs.infiniteLoading.stateChanger.loaded()
+        }
 
-      // if (this.maxCount < 300) {
-      //   let maxId =
-      //     this.lastTweet.RetweetedID !== ''
-      //       ? this.lastTweet.RetweetedID
-      //       : this.lastTweet.ID
-
-      //   this.$axios
-      //     .get(this.getListTimeLineImagesUrl, {
-      //       params: {
-      //         // ここにクエリパラメータを指定する
-      //         listId: listid,
-      //         maxCount: this.getCnt,
-      //         include_rts: this.includeReTweet,
-      //         range_count: 200,
-      //         maxId: maxId,
-      //       },
-      //     })
-      //     .then((response) => {
-      //       const retTweets = response.data['ImageTweetList']
-      //       if (response.data['TotalCount'] > 0) {
-      //         for (let i = 0; i < response.data['TotalCount']; i++) {
-      //           let t = retTweets[i]
-      //           if (t.ID !== this.lastTweet.ID) {
-      //             //this.tweets.push(t);
-      //           }
-      //         }
-
-      //         const preLastTweet = this.lastTweet
-      //         this.lastTweet = retTweets[retTweets.length - 1]
-      //         console.log(
-      //           'preLastTweetId=' +
-      //             preLastTweet.ID +
-      //             ' lastTweet.ID=' +
-      //             this.lastTweet.ID
-      //         )
-      //         if (preLastTweet.ID == this.lastTweet.ID) {
-      //           this.$refs.infiniteLoading.stateChanger.complete()
-      //         }
-      //         this.maxCount += retTweets.length - 1
-
-      //         this.$refs.infiniteLoading.stateChanger.loaded()
-      //       } else {
-      //         ;<v-alert
-      //           border="left"
-      //           color="red"
-      //           dismissible
-      //           icon="これ以上読み込みできません。"
-      //           outlined
-      //           prominent
-      //           text
-      //           type="info"
-      //         ></v-alert>
-      //         this.$refs.infiniteLoading.stateChanger.complete()
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       //リクエスト失敗時
-      //       //alert('request ffe')
-      //       this.$refs.infiniteLoading.stateChanger.complete()
-      //     })
-      // }
+        this.processing = false
+      })
     },
 
-    fetchNewTweets() {
-      // console.log(this)
-      // const th = this
-      // console.log(th.this)
-      // console.log(th.tweets)
-      // console.log(th.tweets.length - 1)
-      // const fetchOldTweet = th.tweets[th.tweets.length - 1]
-      // console.log(fetchOldTweet)
-      // TwitterStore.fetchListTweets({
-      //   id: th.dispListId,
-      //   sinceTweetID: fetchOldTweet.Id,
-      // }).then((data) => {
-      //   data.forEach((tweets) => {
-      //     th.tweets.push(tweets)
-      //   })
-      // })
+    fetchNewTweets(dispListId) {
+      this.processing = true
+      const fetchOldTweet = this.tweets[this.tweets.length - 1]
+
+      const reqSinceTweetID = fetchOldTweet.retweetId
+        ? fetchOldTweet.retweetId
+        : fetchOldTweet.id
+
+      TwitterStore.fetchListTweets({
+        id: dispListId,
+        sinceTweetID: reqSinceTweetID,
+      }).then((data) => {
+        data.forEach((tweet) => {
+          if (fetchOldTweet.id !== tweet.id) {
+            this.tweets.push(tweet)
+          }
+        })
+
+        if (data.length == 1) {
+          //alert('これ以上取得できません')
+          this.show = false
+        }
+
+        this.processing = false
+      })
     },
 
     handleScroll: function () {
       this.scrollY = window.scrollY
+    },
+
+    async classifyImage(tweetId, imgEl) {
+      const model = await nsfwjs.load()
+
+      // Classify the image
+      const predictions = await model.classify(imgEl)
+
+      let scoreDrawing = 0.0
+      let scoreNeutral = 0.0
+      let scoreHentai = 0.0
+
+      predictions.forEach((prediction) => {
+        switch (prediction.className) {
+          case 'Drawing':
+            // 「条件の値」 が 「値1」 と等しいときの処理
+            scoreDrawing = prediction.probability
+            break
+          case 'Neutral':
+            // 「条件の値」 が 「値2」 と等しいときの処理
+            scoreNeutral = prediction.probability
+            break
+          case 'Hentai':
+            // 「条件の値」 が 「値3」 と等しいときの処理
+            scoreHentai = prediction.probability
+            break
+          default:
+            break
+        }
+      })
+
+      if (scoreDrawing > 0.2) {
+        this.drawingTweets.push(tweetId)
+      } else if (scoreNeutral < 0.9) {
+        this.drawingTweets.push(tweetId)
+      } else {
+        console.log('scoreDrawing' + scoreDrawing)
+        console.log('scoreNeutral' + scoreNeutral)
+        console.log(imgEl.src)
+      }
+
+      if (scoreHentai > 0.5) {
+        this.nsfwTweets.push(tweetId)
+      }
+
+      this.classifyImageDone.push(tweetId)
     },
   },
 
@@ -208,6 +234,7 @@ export default {
         let fetchTweets = await TwitterStore.fetchListTweets({
           id: this.dispListId,
         })
+        console.log('fetch new Tweets')
 
         TwitterStore.addNewListTweets({
           listId: this.dispListId,
@@ -235,6 +262,25 @@ export default {
         //this.fetchNewTweets()
       }
     },
+
+    tweets: function (newValue, oldValue) {
+      if (this.mounted) {
+        newValue.forEach((tweet) => {
+          if (!this.classifyImageDone.includes(tweet.id)) {
+            let imgElement = document.createElement('img')
+            imgElement.src = tweet.media.url[0]
+            imgElement.crossOrigin = 'anonymous'
+            imgElement.width = 400
+            imgElement.height = 400
+
+            this.classifyImage(tweet.id, imgElement)
+          }
+        })
+      }
+    },
+    dispContent: function (newValue, oldValue) {
+      //alert('変更されました')
+    },
   },
 
   beforeCreate: function () {
@@ -242,12 +288,20 @@ export default {
   },
   created: function () {
     //console.log(' image List -created')
+    //this.dispContent = DispSettingsStore.getDispContent
   },
   beforeMount: function () {
     //console.log(' image List beforeMount')
   },
-  mounted: function () {
-    window.addEventListener('scroll', this.handleScroll)
+  async mounted(context) {
+    this.mounted = true
+    let message = 'Hello Vue.js!'
+    // コンソールにログを出力します。
+
+    this.$nextTick(function () {
+      // nextTickを使用してコンソールにログを出力します。
+      console.log('dddkjk')
+    })
   },
 }
 </script>

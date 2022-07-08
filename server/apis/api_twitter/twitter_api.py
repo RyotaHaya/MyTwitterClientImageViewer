@@ -3,9 +3,11 @@
     tweepyを利用してツイッターの情報を取得します
 """
 
+from sqlalchemy import null
 import tweepy
 
 from core import config as settings
+from util import timer
 
 
 class TwitterAPI:
@@ -163,23 +165,22 @@ class TwitterAPI:
             filter_args["max_id"] = req_max_id
         
         try:
+            s = timer.timer_start()
             # リクエスト実行
-            res = tweepy.Cursor(self.api.list_timeline, **filter_args).items(item_count)
-            
             ret_list = []
-            for time_line_tweet in res:
+            for time_line_tweet in tweepy.Cursor(self.api.list_timeline, **filter_args).items(item_count):
                 # ツイート情報
-                tweet = time_line_tweet
-                
+                tweet: dict = time_line_tweet
+                origin_tweet: dict = null
+                origin_user: dict = null
                 # リツイート情報
-                retweeted = False
-                retweeted_id = ""
+                retweeted: bool = False
                 if "retweeted_status" in dir(tweet):
                     retweet_status = tweet.retweeted_status
                     retweeted = True
-                    # リツイートの場合、retweet_statuに元ツイートが格納されている
-                    tweet = retweet_status
-                    retweeted_id = tweet.id
+                    # リツイートの場合、retweet_statuに元ツイート情報が格納されている
+                    origin_tweet = retweet_status
+                    origin_user = origin_tweet.user
                 
                 # メディア情報
                 media_urls = []
@@ -196,20 +197,22 @@ class TwitterAPI:
                     continue
                 
                 tweet_status = {
-                    "id": str(tweet.id),
-                    "createdTime": tweet.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    "text": tweet.text,
-                    "retweetId": str(retweeted_id),
+                    "id": str(origin_tweet.id) if retweeted else str(tweet.id),
+                    "createdTime": origin_tweet.created_at.strftime("%Y-%m-%d %H:%M:%S") if retweeted else tweet.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "text": str(origin_tweet.text) if retweeted else str(tweet.text),
+                    "retweetId": str(tweet.id) if retweeted else '',
                     "retweeted": retweeted,
+                    "retweetedUser": str(tweet.user.screen_name) if retweeted else '',
+                    "favorited": tweet.favorited,
                     "media": {
                         "mediaType": media_type,
                         "url": media_urls
                     },
                     "user": {
-                        "id": str(tweet.user.id),
-                        "screenName": tweet.user.screen_name,
-                        "name": tweet.user.name,
-                        "profileImageUrl": tweet.user.profile_image_url,
+                        "id": str(origin_user.id) if retweeted else str(tweet.user.id),
+                        "screenName": str(origin_user.screen_name) if retweeted else tweet.user.screen_name,
+                        "name": str(origin_user.name) if retweeted else tweet.user.name,
+                        "profileImageUrl": str(origin_user.profile_image_url) if retweeted else tweet.user.profile_image_url,
                     },
                 }
                 ret_list.append(tweet_status)

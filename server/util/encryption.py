@@ -1,10 +1,6 @@
-import os
-import sys
-
 from fastapi import HTTPException, status
 
-sys.path.append(os.pardir)
-from database.datastore import store_manager
+from database import datastore
 
 
 def create_auth_token_str(token: str, token_secret: str) -> str:
@@ -20,13 +16,13 @@ def create_auth_token_str(token: str, token_secret: str) -> str:
 
     """
     
-    client = store_manager.ClientManager()
+    client = datastore.ClientManager()
     client.create_auth_token(token, token_secret)
 
 
 def get_auth_token(auth_token: str):
-    client = store_manager.ClientManager()
-    ret = client.get_auth_token(auth_token)
+    client = datastore.ClientManager()
+    return client.get_auth_token(auth_token)
 
 
 def decode_auth_token_str(encryption_str) -> dict[str, str]:

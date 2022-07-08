@@ -37,6 +37,7 @@ export default class Todos extends VuexModule {
   @Action({ rawError: true })
   public async fetchTodos() {
     //const { data } = await $axios.get<Todo[]>('/api/todos')
+    console.log('fetchTodos')
 
     const data = [
       {

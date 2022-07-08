@@ -6,7 +6,7 @@ import {
   MutationAction,
 } from 'vuex-module-decorators'
 
-import * as nsfwjs from 'nsfwjs'
+//import * as nsfwjs from 'nsfwjs'
 
 //vuex-module-decoratorsではinjectはsupprt対象外のため直接インスタンスから参照する
 // https://github.com/nuxt/typescript/issues/342#issuecomment-616514557
@@ -62,7 +62,7 @@ export default class Twitter extends VuexModule {
 
   @Mutation
   async setNswfwModel(payload: any) {
-    this.nsfwModel = await nsfwjs.load()
+    //this.nsfwModel = await nsfwjs.load()
   }
 
   @Mutation
@@ -158,10 +158,12 @@ export default class Twitter extends VuexModule {
   async fetchListTweets(payload: any) {
     let query: any = {
       // ここにクエリパラメータを指定する
-      maxCount: 50,
-      includeRTweets: false,
+      maxCount: 100,
+      itemCount: 50,
+      includeRTweets: true,
       filter: 'media',
     }
+    //console.log(payload)
 
     if (payload['sinceTweetID']) {
       query.sinceTweetId = payload['sinceTweetID']

@@ -18,12 +18,13 @@
           </template>
         </v-menu>
 
-        <v-tab-item
-          v-for="list in listArray"
-          :key="list.id"
-          style="overflow-y: scroll; overflow-x: hidden; height: 800px"
-        >
-          <MoleculesImageList v-bind:dispListId="list.id" />
+        <v-tab-item v-for="list in listArray" :key="list.id">
+          <!-- style="verflow-y: scroll; overflow-x: hidden; height: 800px" -->
+          <MoleculesImageList
+            v-bind:dispListId="list.id"
+            v-bind:classifyModel="classifyModel"
+            v-bind:dispContent="dispContent"
+          />
         </v-tab-item>
       </v-tabs>
     </v-card>
@@ -33,21 +34,38 @@
 <script>
 import { TwitterStore } from '~/store'
 import ImageList from './ImageList.vue'
+import * as nsfwjs from 'nsfwjs'
 export default {
   data() {
     return {
       currentSelectListId: 'home',
       listArray: [],
       userList: [],
+      classifyModel: null,
     }
   },
   components: {
     ImageList,
   },
+  props: {
+    dispContent: {
+      type: String,
+      default: '0',
+      required: true,
+    },
+  },
 
   methods: {
     changeTab: function (tabId) {
       this.currentSelectListId = tabId
+    },
+    async initNSFWJS() {
+      console.log('called calssfy')
+      // TODO modelを事前に読み込みするよう修正
+      console.log('load model  classifyImgae')
+      const model = await nsfwjs.load()
+      this.classifyModel = model
+      console.log('load end model  classifyImgae')
     },
   },
 
@@ -69,6 +87,7 @@ export default {
   async created() {
     if (process.client) {
       TwitterStore.setCurrentDispList(this.currentSelectListId)
+      this.initNSFWJS()
     }
   },
 
@@ -80,9 +99,13 @@ export default {
       // TODO localStoragにある表示設定を見て画面表示対象のみ
       const listId = list['ID']
       const listName = list['Name']
-      // if (listId == '1304418413037498368' || listId == '1280477992594993153') {
-      //   this.listArray.push({ id: listId, name: listName })
-      // }
+      if (
+        listId == '1115171542042734592' ||
+        listId == 'ss' ||
+        listId == 'ssss'
+      ) {
+        //this.listArray.push({ id: listId, name: listName })
+      }
       this.listArray.push({ id: listId, name: listName })
     })
   },

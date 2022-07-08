@@ -1,6 +1,10 @@
-FROM tiangolo/uvicorn-gunicorn:python3.9
-WORKDIR /app
+FROM python:3.10.4-slim-bullseye
 
+# Set environment variables.
+ENV PYTHONWRITEBYTECODE 1
+ENV PYTHONBUFFERED 1
+
+WORKDIR /app
 COPY ../../server /app/
 
 RUN pip install  pipenv && \

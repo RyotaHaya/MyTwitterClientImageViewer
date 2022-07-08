@@ -1,18 +1,18 @@
-import * as nsfwjs from 'nsfwjs'
-import { Store } from 'vuex'
-import { Context } from '@nuxt/types'
+//import * as nsfwjs from 'nsfwjs'
+// import { Store } from 'vuex'
+// import { Context } from '@nuxt/types'
 
-export default function () {
-  ;async () => {
-    const model = await nsfwjs.load()
-    console.log('loaded')
-    console.log(model)
-    return model
-  },
-    (error) => {
-      console.log(error.message)
-    }
-}
+// export default function () {
+//   ;async () => {
+//     const model = await nsfwjs.load()
+//     console.log('loaded')
+//     console.log(model)
+//     return model
+//   },
+//     (error) => {
+//       console.log(error.message)
+//     }
+// }
 // import { Plugin, Context } from '@nuxt/types'
 // import * as tf from '@tensorflow/tfjs'
 

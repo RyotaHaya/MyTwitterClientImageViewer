@@ -5,22 +5,14 @@
 
 from __future__ import annotations
 
-import os
-import sys
-
 from core import config as settings
-from util import timer
+from util import encryption, timer
 
 from .twitter_api import TwitterAPI
 
-sys.path.append(os.pardir)
-
-from util import encryption
-
 
 class TwiterDAO:
-    """TwitterData Access Object（DAO）クラス
-        Twitterの情報操作インターフェース
+    """TwitterData Access Object（DAO）クラス        Twitterの情報操作インターフェース
 
     Attributes:
         属性の名前 (属性の型): 属性の説明
@@ -32,9 +24,14 @@ class TwiterDAO:
         
         token_secret = encryption.get_auth_token(auth_token)
         
+        # テストコード
+        # self.gate = TwitterAPI(
+        #     settings.TWITTER_ACCESS_TOKEN,
+        #     settings.TWITTER_ACCESS_TOKEN_SECRET,
+        # )
         self.gate = TwitterAPI(
-            settings.TWITTER_ACCESS_TOKEN,
-            settings.TWITTER_ACCESS_TOKEN_SECRET,
+            auth_token,
+            token_secret,
         )
     
     def get_home_timeline(self, query: dict[str, object]) -> dict[str, object]:
@@ -91,7 +88,8 @@ class TwiterDAO:
                 query["item_count"],
                 query["max_count"],
             )
-            timer.timer_end(s)
+            result = timer.timer_end(s)
+            print("fetch all elapsed_time:{0}".format(result) + "[sec]")
             
             return {"totalCount": len(tweets), "timeLineTweets": tweets}
         
