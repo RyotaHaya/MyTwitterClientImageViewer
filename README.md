@@ -1,4 +1,4 @@
-SNSのサービスであるTwitterをイラストSNSのpixivライクのように  
+SNSのサービスであるTwitterをイラストSNSのpixivライクに  
 利用できるtwitterクライアントアプリケーションです(開発中)。
 
 ■開発管理
